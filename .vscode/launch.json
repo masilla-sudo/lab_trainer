@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug CMake target with CodeLLDB (dispatcher_trainer)",
+      "name": "Debug dispatcher_trainer",
       "type": "lldb",
       "request": "launch",
       "program": "${workspaceFolder}/build/debug/dispatcher_trainer",
