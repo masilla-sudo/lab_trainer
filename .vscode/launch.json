@@ -2,15 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug dispatcher_trainer",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/build/debug/dispatcher_trainer",
+      "name": "Debug dispatcher_trainer",
+      "program": "\${workspaceFolder}/build/dispatcher_trainer",
       "args": [],
-      "cwd": "${workspaceFolder}",
-      "sourceLanguages": ["cpp"],
-      "preLaunchTask": "CMake: build debug",
-      "console": "integratedTerminal"
+      "cwd": "\${workspaceFolder}",
+      "terminal": "integrated"
     }
   ]
 }
