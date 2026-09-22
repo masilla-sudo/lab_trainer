@@ -1,0 +1,89 @@
+classDiagram
+    namespace dispatcher {
+        enum UnitStatus {
+            Available
+            Busy
+            Maintenance
+            Offline
+        }
+        enum IncidentStatus {
+            Open
+            Assigned
+            Closed
+        }
+        enum Severity {
+            Low
+            Medium
+            High
+            Critical
+        }
+        enum VisualMarker {
+            None
+            Alert
+            Route
+            Repair
+            Evacuation
+            Sensor
+        }
+
+        class DispatchUnit {
+            +DispatchUnit(int, string, string)
+            +id() int
+            +name() string
+            +zone() string
+            +status() UnitStatus
+            +assignedIncidentId() optional~int~
+            +assignToIncident(int) bool
+            +release() void
+            +setMaintenance() void
+            +setOffline() void
+            -id_ int
+            -name_ string
+            -zone_ string
+            -status_ UnitStatus
+            -assignedIncidentId_ optional~int~
+        }
+
+        class Incident {
+            +Incident(int, string, string, Severity, VisualMarker)
+            +id() int
+            +title() string
+            +zone() string
+            +severity() Severity
+            +status() IncidentStatus
+            +marker() VisualMarker
+            +assignedUnitId() optional~int~
+            +assignUnit(int) bool
+            +close() void
+            -id_ int
+            -title_ string
+            -zone_ string
+            -severity_ Severity
+            -status_ IncidentStatus
+            -marker_ VisualMarker
+            -assignedUnitId_ optional~int~
+        }
+
+        class EventLog {
+            +EventLog(path)
+            +~EventLog()
+            +write(string_view) void
+            -out_ ofstream
+        }
+
+        class DispatchCenter {
+            +DispatchCenter(EventLog&)
+            +addUnit(DispatchUnit) void
+            +addIncident(Incident) void
+            +assign(int, int) bool
+            +closeIncident(int) bool
+            +printUnits() void
+            +printIncidents() void
+            +printState() void
+            -findUnit(int) DispatchUnit*
+            -findIncident(int) Incident*
+            -log_ EventLog&
+            -units_ vector~DispatchUnit~
+            -incidents_ vector~Incident~
+        }
+    }
