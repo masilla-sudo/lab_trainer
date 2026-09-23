@@ -1,27 +1,30 @@
-#include "dispatcher/EventLog.hpp"
-#include <iostream>
-#include <stdexcept>
+#include "dispatcher/EventLog.hpp"  // Подключает объявление класса EventLog и все связанные типы
+#include <iostream>                 // Подключает потоки ввода-вывода (на случай отладки или вывода в консоль)
+#include <stdexcept>                // Подключает стандартные исключения (std::runtime_error) для обработки ошибок работы с файлами
 
-namespace dispatcher {
+namespace dispatcher {              // Пространство имён для компонентов диспетчерской системы
 
+// Конструктор: открывает файл журнала в режиме дозаписи (append) и проверяет успешность открытия
 EventLog::EventLog(const std::filesystem::path& path)
-    : out_(path, std::ios::app)
+    : out_(path, std::ios::app)    // Инициализирует поток ofstream: открывает файл по указанному пути в режиме добавления данных
 {
-    if (!out_) {
-        throw std::runtime_error("Cannot open event log file: " + path.string());
+    if (!out_) {                    // Проверяет, удалось ли открыть файл (поток не пуст)
+        throw std::runtime_error("Cannot open event log file: " + path.string());  // Если не удалось — выбрасывает исключение с путём к файлу
     }
-    write("log opened");
+    write("log opened");            // Записывает стартовое событие: журнал успешно открыт
 }
 
+// Деструктор: корректно завершает работу с файлом журнала
 EventLog::~EventLog() {
-    if (out_) {
-        out_ << "log closed\n";
+    if (out_) {                      // Проверяет, открыт ли ещё поток (на случай, если файл не удалось открыть изначально)
+        out_ << "log closed\n";      // Записывает финальное событие: журнал закрывается
     }
 }
 
+// Записывает сообщение в журнал событий (если поток активен)
 void EventLog::write(std::string_view message) {
-    if (out_) {
-        out_ << message << '\n';
+    if (out_) {                      // Проверяет, что файл всё ещё открыт и доступен для записи
+        out_ << message << '\n';     // Добавляет переданное сообщение и символ перевода строки в файл
     }
 }
 

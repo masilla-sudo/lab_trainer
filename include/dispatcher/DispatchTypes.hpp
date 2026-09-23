@@ -1,17 +1,40 @@
-#pragma once
-#include <string_view>
+#pragma once                              // Предотвращает многократное подключение этого заголовочного файла
+#include <string_view>                    // Подключает тип string_view для эффективной работы со строками без копирования
 
-namespace dispatcher {
+namespace dispatcher {                    // Пространство имён для компонентов диспетчерской системы
 
-enum class UnitStatus { Available, Busy, Maintenance, Offline };
-enum class IncidentStatus { Open, Assigned, Closed };
-enum class Severity { Low, Medium, High, Critical };
-enum class VisualMarker { None, Alert, Route, Repair, Evacuation, Sensor };
+enum class UnitStatus {                   // Статус диспетчерского подразделения
+    Available,                           // Доступно для назначения
+    Busy,                                 // Занято (обрабатывает инцидент)
+    Maintenance,                          // На техобслуживании
+    Offline                               // Недоступно (отключено)
+};
 
-// ТОЛЬКО объявления! Без тела функции
-std::string_view toString(UnitStatus status);
-std::string_view toString(IncidentStatus status);
-std::string_view toString(Severity severity);
-std::string_view toString(VisualMarker marker);
+enum class IncidentStatus {              // Статус инцидента (происшествия)
+    Open,                                 // Открыт, ожидает обработки
+    Assigned,                             // Назначен на подразделение
+    Closed                                // Закрыт (устранён)
+};
+
+enum class Severity {                     // Уровень серьёзности инцидента
+    Low,                                  // Низкий уровень угрозы
+    Medium,                               // Средний уровень угрозы
+    High,                                 // Высокий уровень угрозы
+    Critical                              // Критический уровень угрозы
+};
+
+enum class VisualMarker {                 // Визуальный маркер для отображения на схеме/карте
+    None,                                 // Без маркера
+    Alert,                                // Тревога/предупреждение
+    Route,                                // Маршрут движения
+    Repair,                               // Требуется ремонт
+    Evacuation,                           // Необходима эвакуация
+    Sensor                                // Зона контроля датчиком
+};
+
+std::string_view toString(UnitStatus status);      // Возвращает строковое представление статуса подразделения
+std::string_view toString(IncidentStatus status);  // Возвращает строковое представление статуса инцидента
+std::string_view toString(Severity severity);      // Возвращает строковое представление уровня серьёзности
+std::string_view toString(VisualMarker marker);     // Возвращает строковое представление визуального маркера
 
 } // namespace dispatcher

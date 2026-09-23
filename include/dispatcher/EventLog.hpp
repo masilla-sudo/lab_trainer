@@ -1,18 +1,18 @@
-#pragma once
-#include <filesystem>
-#include <fstream>
-#include <string_view>
+#pragma once                              // Предотвращает многократное подключение этого заголовочного файла
+#include <filesystem>                     // Подключает библиотеку для работы с файловой системой (пути, файлы)
+#include <fstream>                        // Подключает потоки для чтения и записи файлов (в т.ч. ofstream)
+#include <string_view>                     // Подключает тип string_view — для эффективной передачи строк без копирования
 
-namespace dispatcher {
+namespace dispatcher {                    // Пространство имён для компонентов диспетчерской системы
 
-class EventLog {
+class EventLog {                          // Класс для ведения журнала событий (запись логов в файл)
 public:
-    explicit EventLog(const std::filesystem::path& path);
-    ~EventLog();
-    void write(std::string_view message);
+    explicit EventLog(const std::filesystem::path& path);  // Конструктор: создаёт логгер, указывая путь к файлу для записи
+    ~EventLog();                                          // Деструктор: корректно закрывает файл при уничтожении объекта
+    void write(std::string_view message);                 // Записывает сообщение в журнал событий
 
 private:
-    std::ofstream out_;
+    std::ofstream out_;                                   // Поток для записи данных в файл (хранится внутри класса)
 };
 
 } // namespace dispatcher
