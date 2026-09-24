@@ -10,4 +10,4 @@ out/
 *.a
 *.log
 .vscode/.browse.VC.db*
-.DS_Store
+.DS_Storebuild/
