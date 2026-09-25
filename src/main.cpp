@@ -92,5 +92,14 @@ int main() {
               << " | " << warnDesc.color
               << " | " << warnDesc.visualKind << "\n";
 
-    return 0;
+      // --- Проверка Critical ---
+    std::cout << "\n=== Проверка Critical ===\n";
+    speed.setValue(140.0);
+    auto critResult = rules[0]->check();
+    auto critDesc = makeDescriptor(speed, critResult);
+    std::cout << critDesc.objectId << " | " << critDesc.label
+              << " | " << critDesc.valueStr
+              << " | " << critDesc.color
+              << " | " << critDesc.visualKind << "\n";
+              return 0;
 }

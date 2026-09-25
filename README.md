@@ -211,3 +211,85 @@ classDiagram
     RangeRule~T~ ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
 ```
+```mermaid
+classDiagram
+    class Parameter~T~ {
+        +string id_
+        +string label_
+        +T value_
+        +string unit_
+    }
+    
+    class Range~T~ {
+        +T min_
+        +T max_
+        +bool contains(T value)
+    }
+    
+    abstract class ICheckRule {
+        +CheckResult check()
+    }
+    
+    class RangeRule~T~ {
+        -Parameter~T~ parameter_
+        -Range~T~ normalRange_
+        -optional~Range~T~~ criticalRange_
+        -string problemMessage_
+        +CheckResult check()
+    }
+
+    Parameter~T~ "1" *-- "1" RangeRule~T~ : содержит
+    Range~T~ "1" *-- "1" RangeRule~T~ : использует
+    ICheckRule <|-- RangeRule~T~ : наследуется
+    ## Диаграмма классов (Lab 6)
+
+```mermaid
+classDiagram
+    class Parameter~T~ {
+        -string id_
+        -string label_
+        -T value_
+        -string unit_
+        +id() string
+        +label() string
+        +value() T
+        +setValue(T) void
+    }
+
+    class Range~T~ {
+        -T min
+        -T max
+        +contains(T) bool
+    }
+
+    abstract class ICheckRule {
+        +check() CheckResult*
+    }
+
+    class RangeRule~T~ {
+        -Parameter~T~ parameter_
+        -Range~T~ normalRange_
+        -optional~Range~T~~ criticalRange_
+        -string problemMessage_
+        +check() CheckResult
+    }
+
+    class CheckResult {
+        +string parameterId
+        +string message
+        +Severity severity
+    }
+
+    class SignalState {
+        <<enumeration>>
+        Red
+        Yellow
+        Green
+        Off
+    }
+
+    Parameter~T~ "1" *-- "1" RangeRule~T~ : parameter_
+    Range~T~ "1..2" *-- "1" RangeRule~T~ : normalRange_ + criticalRange_
+    ICheckRule <|-- RangeRule~T~ : наследование
+    RangeRule~T~ ..> CheckResult : возвращает
+    Parameter~SignalState~ ..> SignalState : инстанцируется
