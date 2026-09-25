@@ -1,137 +1,96 @@
-#include <dispatcher/core/check_result.hpp>
-#include <dispatcher/core/parameter.hpp>
-#include <dispatcher/core/range.hpp>
-#include <dispatcher/core/rules.hpp>
-#include <dispatcher/core/signal_state.hpp>
-#include <dispatcher/core/is_inside_range.hpp>
-#include <dispatcher/presentation/visual_descriptor.hpp>
+#include "dispatcher/core/check_result.hpp"
+#include "dispatcher/core/parameter.hpp"
+#include "dispatcher/core/range.hpp"
+#include "dispatcher/core/rules.hpp"
+#include "dispatcher/core/signal_state.hpp"
+#include "dispatcher/core/concepts.hpp"
+#include "dispatcher/presentation/visual_descriptor.hpp"
 
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <array>
-#include <string>
 
-// ─── Визуальные слои (из предыдущей работы — сохраняем преемственность) ───
-const std::array<std::string, 5>& visualLayerNames() {
-    static const std::array<std::string, 5> layers = {
-        "platform_map",      // Карта платформ — базовый слой
-        "passenger_flow",    // Поток пассажиров
-        "gates",             // Выходы/гейты
-        "delays",            // Задержки
-        "ar_gate_marker"     // AR-маркер у гейта
-    };
-    return layers;
-}
+int main() {
+    // --- Параметры железнодорожной станции ---
+    Parameter<double> speed("V-101", "Скорость поезда", 55.0, "км/ч");
+    Parameter<double> interval("I-201", "Интервал между поездами", 7.0, "мин");
+    Parameter<int>    occupancy("O-301", "Занятость пути", 2, "пути");
+    Parameter<SignalState> signal("S-501", "Светофор", SignalState::Green, "состояние");
 
-// Вариант: Транспортный диспетчер
-// Параметры: скорость, интервал, задержка, занятость пути, состояние светофора.
-int main()
-{
-    // ─── Создаём типизированные параметры транспортного узла ───
-    // Скорость поезда — double, норма 0..80 км/ч
-    Parameter<double> speed("V-101", "Скорость поезда", 65.0, "km/h");
-    // Интервал между поездами — double, норма 2..10 мин
-    Parameter<double> interval("I-201", "Интервал", 3.5, "min");
-    // Задержка — int, норма 0..5 мин
-    Parameter<int> delay("D-301", "Задержка", 7, "min");
-    // Занятость пути — int, норма 0..80 %
-    Parameter<int> occupancy("O-401", "Занятость пути", 45, "%");
-    // Состояние светофора — SignalState (перечисление)
-    Parameter<SignalState> signal("S-501", "Светофор", SignalState::On, "state");
-
-    // ─── Проверка через функциональный шаблон isInsideRange ───
-    std::cout << "=== Проверка isInsideRange (функциональный шаблон) ===\n";
-    std::cout << "isInsideRange(65.0, 0.0, 80.0) = "
-              << isInsideRange(65.0, 0.0, 80.0) << "\n";
-    std::cout << "isInsideRange(3.5, 2.0, 10.0) = "
-              << isInsideRange(3.5, 2.0, 10.0) << "\n";
-    std::cout << "isInsideRange(7, 0, 5) = "
-              << isInsideRange(7, 0, 5) << "\n\n";
-
-    // ─── Создаём правила проверки ───
-    // Вектор unique_ptr<ICheckRule> — полиморфизм времени выполнения,
-    // но сами правила создаются через шаблоны (компиляционное обобщение).
+    // --- Правила проверки ---
     std::vector<std::unique_ptr<ICheckRule>> rules;
 
-    // Скорость: норма 0..80, критика выше 100
     rules.push_back(std::make_unique<RangeRule<double>>(
         speed,
         Range<double>{0.0, 80.0},
-        Range<double>{100.0, 300.0},
+        std::optional<Range<double>>(Range<double>{100.0, 200.0}),
         "Скорость вне нормы"
     ));
 
-    // Интервал: норма 2..10 (без критического диапазона)
     rules.push_back(std::make_unique<RangeRule<double>>(
         interval,
-        Range<double>{2.0, 10.0},
+        Range<double>{5.0, 10.0},
+        std::nullopt,
         "Интервал вне нормы"
     ));
 
-    // Задержка: норма 0..5, критика выше 15
-    rules.push_back(std::make_unique<RangeRule<int>>(
-        delay,
-        Range<int>{0, 5},
-        Range<int>{15, 999},
-        "Задержка недопустима"
-    ));
-
-    // Занятость пути: норма 0..80
     rules.push_back(std::make_unique<RangeRule<int>>(
         occupancy,
-        Range<int>{0, 80},
+        Range<int>{0, 5},
+        std::optional<Range<int>>(Range<int>{10, 99}),
         "Занятость пути вне нормы"
     ));
 
-    // ─── Выполняем проверки ───
+    // --- Проверка параметров через RangeRule<T> ---
     std::cout << "=== Проверка параметров через RangeRule<T> ===\n";
-    std::vector<CheckResult> results;
     for (const auto& rule : rules) {
-        CheckResult r = rule->check();
-        results.push_back(r);
-        std::cout << r.parameterId << ": " << r.message
-                  << " [" << static_cast<int>(r.severity) << "]\n";
+        CheckResult result = rule->check();
+
+        std::cout << result.parameterId << ": " << result.message << " [";
+        switch (result.severity) {
+            case Severity::Ok:       std::cout << "OK"; break;
+            case Severity::Warning:  std::cout << "WARNING"; break;
+            case Severity::Critical: std::cout << "CRITICAL"; break;
+        }
+        std::cout << "]\n";
     }
 
-    // ─── Визуальные дескрипторы (DTO для будущей визуализации) ───
-    std::cout << "\n=== Визуальные дескрипторы (DTO) ===\n";
-    {
-        auto vd = makeDescriptor(speed, results[0]);
-        std::cout << vd.objectId << " | " << vd.visualKind
-                  << " | " << vd.label << " | " << vd.color
-                  << " | prio=" << vd.priority << "\n";
-    }
-    {
-        auto vd = makeDescriptor(interval, results[1]);
-        std::cout << vd.objectId << " | " << vd.visualKind
-                  << " | " << vd.label << " | " << vd.color
-                  << " | prio=" << vd.priority << "\n";
-    }
-    {
-        auto vd = makeDescriptor(delay, results[2]);
-        std::cout << vd.objectId << " | " << vd.visualKind
-                  << " | " << vd.label << " | " << vd.color
-                  << " | prio=" << vd.priority << "\n";
-    }
-    {
-        auto vd = makeDescriptor(occupancy, results[3]);
-        std::cout << vd.objectId << " | " << vd.visualKind
-                  << " | " << vd.label << " | " << vd.color
-                  << " | prio=" << vd.priority << "\n";
-    }
+    // --- Демонстрация SignalState ---
+    std::cout << "\n=== Состояние сигнала ===\n";
+    std::cout << "Светофор: " << signal.value() << "\n";
+    signal.setValue(SignalState::Red);
+    std::cout << "После переключения: " << signal.value() << "\n";
 
-    // ─── Визуальные слои (из предыдущей работы) ───
-    std::cout << "\n=== Визуальные слои ===\n";
-    for (const auto& layer : visualLayerNames()) {
-        std::cout << "- " << layer << "\n";
-    }
+    // --- Демонстрация makeDescriptor (задание повышенной сложности) ---
+    std::cout << "\n=== VisualDescriptor для каждого параметра ===\n";
 
-    // ─── Состояние светофора (SignalState) ───
-    std::cout << "\n=== Состояние светофора (enum class SignalState) ===\n";
-    std::cout << signal.id() << " (" << signal.label() << "): "
-              << toString(signal.value()) << "\n";
+    auto descSpeed = makeDescriptor(speed, rules[0]->check());
+    std::cout << descSpeed.objectId << " | " << descSpeed.label
+              << " | " << descSpeed.valueStr
+              << " | " << descSpeed.color
+              << " | " << descSpeed.visualKind << "\n";
 
-    std::cout << "\nГотово.\n";
+    auto descInterval = makeDescriptor(interval, rules[1]->check());
+    std::cout << descInterval.objectId << " | " << descInterval.label
+              << " | " << descInterval.valueStr
+              << " | " << descInterval.color
+              << " | " << descInterval.visualKind << "\n";
+
+    auto descOccupancy = makeDescriptor(occupancy, rules[2]->check());
+    std::cout << descOccupancy.objectId << " | " << descOccupancy.label
+              << " | " << descOccupancy.valueStr
+              << " | " << descOccupancy.color
+              << " | " << descOccupancy.visualKind << "\n";
+
+    // --- Проверка Warning: меняем интервал ---
+    std::cout << "\n=== Проверка Warning ===\n";
+    interval.setValue(3.0);
+    auto warnResult = rules[1]->check();
+    auto warnDesc = makeDescriptor(interval, warnResult);
+    std::cout << warnDesc.objectId << " | " << warnDesc.label
+              << " | " << warnDesc.valueStr
+              << " | " << warnDesc.color
+              << " | " << warnDesc.visualKind << "\n";
+
     return 0;
 }

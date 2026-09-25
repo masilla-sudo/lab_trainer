@@ -1,22 +1,19 @@
 #pragma once
+#include <ostream>
 
-#include <string>
-
-// Состояние дискретного сигнала — пример параметра с перечислимым типом.
-// Используется для клапанов, насосов, выключателей и т.п.
 enum class SignalState {
-    Off,
-    On,
-    Fault
+    Red,
+    Yellow,
+    Green,
+    Off
 };
 
-// Строковое представление состояния для вывода и DTO.
-inline std::string toString(SignalState s)
-{
-    switch (s) {
-        case SignalState::Off:   return "OFF";
-        case SignalState::On:    return "ON";
-        case SignalState::Fault: return "FAULT";
+inline std::ostream& operator<<(std::ostream& os, SignalState state) {
+    switch (state) {
+        case SignalState::Red:    return os << "RED";
+        case SignalState::Yellow: return os << "YELLOW";
+        case SignalState::Green:  return os << "GREEN";
+        case SignalState::Off:    return os << "OFF";
+        default:                  return os << "UNKNOWN";
     }
-    return "UNKNOWN";
 }
