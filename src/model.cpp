@@ -42,3 +42,39 @@ bool setParameter(ParameterList& parameters, const std::string& name, double new
     }
     return false;                   // Сообщает, что параметр не найден
 }
+#include <algorithm>
+#include <iterator>
+
+// --- find_if: поиск параметра по имени ---
+const ParameterRecord* findParameterByName(const ParameterList& parameters,
+                                            const std::string& name) {
+    auto it = std::find_if(parameters.begin(), parameters.end(),
+        [&name](const ParameterRecord& p) {    // lambda #1
+            return p.name == name;
+        });
+    return (it != parameters.end()) ? &(*it) : nullptr;
+}
+
+// --- transform: список имён параметров ---
+std::vector<std::string> getParameterNames(const ParameterList& parameters) {
+    std::vector<std::string> names;
+    names.reserve(parameters.size());
+    std::transform(parameters.begin(), parameters.end(),
+                   std::back_inserter(names),
+                   [](const ParameterRecord& p) {    // lambda #2
+                       return p.name;
+                   });
+    return names;
+}
+
+// --- transform: краткие строки "name=value unit" ---
+std::vector<std::string> getParameterSummary(const ParameterList& parameters) {
+    std::vector<std::string> summary;
+    summary.reserve(parameters.size());
+    std::transform(parameters.begin(), parameters.end(),
+                   std::back_inserter(summary),
+                   [](const ParameterRecord& p) {    // lambda #3
+                       return p.name + " = " + std::to_string(p.value) + " " + p.unit;
+                   });
+    return summary;
+}

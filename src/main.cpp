@@ -1,105 +1,127 @@
-#include "dispatcher/core/check_result.hpp"
-#include "dispatcher/core/parameter.hpp"
-#include "dispatcher/core/range.hpp"
-#include "dispatcher/core/rules.hpp"
-#include "dispatcher/core/signal_state.hpp"
-#include "dispatcher/core/concepts.hpp"
-#include "dispatcher/presentation/visual_descriptor.hpp"
+#include "trainer/model.hpp"
+#include "trainer/log.hpp"
+#include "trainer/commands.hpp"
 
 #include <iostream>
-#include <memory>
-#include <vector>
+#include <string>
 
 int main() {
-    // --- Параметры железнодорожной станции ---
-    Parameter<double> speed("V-101", "Скорость поезда", 55.0, "км/ч");
-    Parameter<double> interval("I-201", "Интервал между поездами", 7.0, "мин");
-    Parameter<int>    occupancy("O-301", "Занятость пути", 2, "пути");
-    Parameter<SignalState> signal("S-501", "Светофор", SignalState::Green, "состояние");
+    // --- Исходные параметры диспетчерского тренажёра (вариант Е) ---
+    ParameterList parameters = {
+        {"V-101", 55.0,   0.0,  80.0,  "км/ч"},
+        {"I-201",  7.0,   5.0,  10.0,  "мин"},
+        {"O-301",  2.0,   0.0,   5.0,  "пути"},
+        {"C-401",  1.0,   0.0,   3.0,  "канал"},
+    };
 
-    // --- Правила проверки ---
-    std::vector<std::unique_ptr<ICheckRule>> rules;
+    // --- Исходный журнал событий ---
+    EventLog log;
+    addEvent(log, "Info",           "system",  "Тренажёр запущен");
+    addEvent(log, "OperatorAction", "V-101",   "Оператор изменил скорость");
+    addEvent(log, "Warning",        "I-201",   "Интервал ниже нормы");
+    addEvent(log, "Alarm",          "O-301",   "Занятость пути превышена");
+    addEvent(log, "Info",           "system",  "Проверка параметров завершена");
 
-    rules.push_back(std::make_unique<RangeRule<double>>(
-        speed,
-        Range<double>{0.0, 80.0},
-        std::optional<Range<double>>(Range<double>{100.0, 200.0}),
-        "Скорость вне нормы"
-    ));
+    std::cout << "=== Диспетчерский тренажёр (ЛР 7: STL-контейнеры и алгоритмы) ===\n\n";
 
-    rules.push_back(std::make_unique<RangeRule<double>>(
-        interval,
-        Range<double>{5.0, 10.0},
-        std::nullopt,
-        "Интервал вне нормы"
-    ));
+    std::string line;
+    bool running = true;
 
-    rules.push_back(std::make_unique<RangeRule<int>>(
-        occupancy,
-        Range<int>{0, 5},
-        std::optional<Range<int>>(Range<int>{10, 99}),
-        "Занятость пути вне нормы"
-    ));
+    while (running) {
+        std::cout << "> ";
+        if (!std::getline(std::cin, line)) break;
 
-    // --- Проверка параметров через RangeRule<T> ---
-    std::cout << "=== Проверка параметров через RangeRule<T> ===\n";
-    for (const auto& rule : rules) {
-        CheckResult result = rule->check();
+        auto tokens = splitCommand(line);
+        if (tokens.empty()) continue;
 
-        std::cout << result.parameterId << ": " << result.message << " [";
-        switch (result.severity) {
-            case Severity::Ok:       std::cout << "OK"; break;
-            case Severity::Warning:  std::cout << "WARNING"; break;
-            case Severity::Critical: std::cout << "CRITICAL"; break;
+        const std::string& cmd = tokens[0];
+
+        if (cmd == "help") {
+            printHelp();
+
+        } else if (cmd == "status") {
+            printParameters(parameters);
+
+        } else if (cmd == "set" && tokens.size() >= 3) {
+            double val = std::stod(tokens[2]);
+            if (setParameter(parameters, tokens[1], val)) {
+                std::cout << "Параметр " << tokens[1] << " обновлён.\n";
+                checkParametersAndLogWarnings(parameters, log);
+            } else {
+                std::cout << "Параметр не найден.\n";
+            }
+
+        } else if (cmd == "event" && tokens.size() >= 3) {
+            std::string msg;
+            for (size_t i = 2; i < tokens.size(); ++i) {
+                if (i > 2) msg += " ";
+                msg += tokens[i];
+            }
+            addEvent(log, tokens[1], "manual", msg);
+            std::cout << "Событие добавлено.\n";
+
+        } else if (cmd == "log") {
+            printEventLog(log);
+
+        } else if (cmd == "find" && tokens.size() >= 2) {
+            // find_if: поиск параметра по имени
+            const ParameterRecord* p = findParameterByName(parameters, tokens[1]);
+            if (p) {
+                std::cout << "Найден: " << p->name << " = " << p->value
+                          << " " << p->unit
+                          << " [" << p->minValue << ".." << p->maxValue << "]\n";
+            } else {
+                std::cout << "Параметр \"" << tokens[1] << "\" не найден.\n";
+            }
+
+        } else if (cmd == "alarm") {
+            // count_if + copy_if
+            std::size_t count = countAlarmEvents(log);
+            std::cout << "Тревожных событий: " << count << "\n";
+            auto alarms = getAlarmEvents(log);
+            for (const auto& e : alarms) {
+                std::cout << "  [" << e.id << "] " << e.severity
+                          << " | " << e.source << " | " << e.message << "\n";
+            }
+
+        } else if (cmd == "sorted") {
+            // sort: отсортированная копия журнала
+            auto sorted = getSortedEventLog(log);
+            std::cout << "Журнал (отсортированный по приоритету):\n";
+            for (const auto& e : sorted) {
+                std::cout << "  [" << e.id << "] " << e.severity
+                          << " | " << e.source << " | " << e.message << "\n";
+            }
+
+        } else if (cmd == "stats") {
+            // map: статистика по типам событий
+            auto stats = getEventStatistics(log);
+            std::cout << "Статистика по типам событий:\n";
+            std::size_t total = 0;
+            for (const auto& [type, count] : stats) {
+                std::cout << "  " << type << ": " << count << "\n";
+                total += count;
+            }
+            std::cout << "  Всего: " << total << "\n";
+
+        } else if (cmd == "summary") {
+            // transform: краткий список параметров
+            auto summary = getParameterSummary(parameters);
+            std::cout << "Краткий список параметров:\n";
+            for (const auto& s : summary) {
+                std::cout << "  " << s << "\n";
+            }
+
+        } else if (cmd == "visual") {
+            printVisualLayers(visualLayerNames());
+
+        } else if (cmd == "exit") {
+            running = false;
+
+        } else {
+            std::cout << "Неизвестная команда. Введите \"help\".\n";
         }
-        std::cout << "]\n";
     }
 
-    // --- Демонстрация SignalState ---
-    std::cout << "\n=== Состояние сигнала ===\n";
-    std::cout << "Светофор: " << signal.value() << "\n";
-    signal.setValue(SignalState::Red);
-    std::cout << "После переключения: " << signal.value() << "\n";
-
-    // --- Демонстрация makeDescriptor (задание повышенной сложности) ---
-    std::cout << "\n=== VisualDescriptor для каждого параметра ===\n";
-
-    auto descSpeed = makeDescriptor(speed, rules[0]->check());
-    std::cout << descSpeed.objectId << " | " << descSpeed.label
-              << " | " << descSpeed.valueStr
-              << " | " << descSpeed.color
-              << " | " << descSpeed.visualKind << "\n";
-
-    auto descInterval = makeDescriptor(interval, rules[1]->check());
-    std::cout << descInterval.objectId << " | " << descInterval.label
-              << " | " << descInterval.valueStr
-              << " | " << descInterval.color
-              << " | " << descInterval.visualKind << "\n";
-
-    auto descOccupancy = makeDescriptor(occupancy, rules[2]->check());
-    std::cout << descOccupancy.objectId << " | " << descOccupancy.label
-              << " | " << descOccupancy.valueStr
-              << " | " << descOccupancy.color
-              << " | " << descOccupancy.visualKind << "\n";
-
-    // --- Проверка Warning: меняем интервал ---
-    std::cout << "\n=== Проверка Warning ===\n";
-    interval.setValue(3.0);
-    auto warnResult = rules[1]->check();
-    auto warnDesc = makeDescriptor(interval, warnResult);
-    std::cout << warnDesc.objectId << " | " << warnDesc.label
-              << " | " << warnDesc.valueStr
-              << " | " << warnDesc.color
-              << " | " << warnDesc.visualKind << "\n";
-
-      // --- Проверка Critical ---
-    std::cout << "\n=== Проверка Critical ===\n";
-    speed.setValue(140.0);
-    auto critResult = rules[0]->check();
-    auto critDesc = makeDescriptor(speed, critResult);
-    std::cout << critDesc.objectId << " | " << critDesc.label
-              << " | " << critDesc.valueStr
-              << " | " << critDesc.color
-              << " | " << critDesc.visualKind << "\n";
-              return 0;
+    return 0;
 }
