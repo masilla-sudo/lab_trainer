@@ -1,5 +1,3 @@
-markdown
-
 # dispatcher_trainer – Лабораторная работа 8: Modern C++ State
 
 Цель работы: применить современные возможности C++ (C++17/20) для безопасной обработки состояний и команд в ядре диспетчерского тренажёра.
@@ -64,21 +62,17 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
-markdown
-
 ## Диаграмма 1: Поток данных
 
 ```mermaid
 flowchart TD
-    A[Parameter<T>] --> B[Range<T>]
-    B --> C[RangeRule<T>]
+    A[Parameter] --> B[Range]
+    B --> C[RangeRule]
     C --> D[ICheckRule]
     D --> E[CheckResult]
     E --> F[VisualDescriptor]
     A --> F
     C --> E
-
-text
 
 ---
 
