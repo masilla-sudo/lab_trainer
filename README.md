@@ -64,9 +64,11 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
-## Диаграмма 1: Поток данных
-````mermaid``
+markdown
 
+## Диаграмма 1: Поток данных
+
+```mermaid
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
     B --> C[RangeRule<T>]
@@ -75,7 +77,10 @@ flowchart TD
     E --> F[VisualDescriptor]
     A --> F
     C --> E
-`````
+
+text
+
+---
 
 #### Диаграмма 2: Классы правил и проверок
 
