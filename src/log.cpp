@@ -76,3 +76,19 @@ std::map<std::string, std::size_t> getEventStatistics(const EventLog& log) {
     }
     return stats;
 }
+#include <filesystem>
+#include <fstream>
+
+// ... существующие функции ...
+
+// --- ЛР 8: std::filesystem — сохранение текстового журнала ---
+void saveTextLog(const EventLog& log, const std::filesystem::path& path) {
+    if (path.has_parent_path()) {
+        std::filesystem::create_directories(path.parent_path());
+    }
+    std::ofstream out(path);
+    for (const auto& e : log) {
+        out << "[" << e.id << "] " << e.severity
+            << " | " << e.source << " | " << e.message << "\n";
+    }
+}

@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <string>
+#include <cassert>
+#include <filesystem>
 
 int main() {
     // --- Исходные параметры диспетчерского тренажёра (вариант Е) ---
@@ -22,8 +24,31 @@ int main() {
     addEvent(log, "Alarm",          "O-301",   "Занятость пути превышена");
     addEvent(log, "Info",           "system",  "Проверка параметров завершена");
 
-    std::cout << "=== Диспетчерский тренажёр (ЛР 7: STL-контейнеры и алгоритмы) ===\n\n";
+    std::cout << "=== Диспетчерский тренажёр (ЛР 8: modern C++ — optional, variant, filesystem) ===\n\n";
 
+    // --- Самопроверка (assert) ---
+    assert(findParameterIndex(parameters, "V-101").has_value());
+    assert(!findParameterIndex(parameters, "UNKNOWN").has_value());
+
+    // Проверка variant-команды
+    auto testResult = applyCommand(parameters, log, "V-101", 60.0);
+    std::cout << "[Тест] " << commandResultToText(testResult) << "\n\n";
+
+    // --- Тесты граничных значений для V-101 ---
+    // Диапазон V-101: [0..80], range = 80
+    // Критическая зона (2%): 80 * 0.02 = 1.6 → порог: 80 - 1.6 = 78.4
+    // Зона предупреждения (5%): 80 * 0.05 = 4.0 → порог: 80 - 4.0 = 76.0
+
+    auto res_crit = applyCommand(parameters, log, "V-101", 79.0);
+    std::cout << "[Тест] Критическая зона (79.0): " << commandResultToText(res_crit) << "\n";
+
+    auto res_warn = applyCommand(parameters, log, "V-101", 77.0);
+    std::cout << "[Тест] Зона предупреждения (77.0): " << commandResultToText(res_warn) << "\n";
+
+    auto res_err = applyCommand(parameters, log, "V-101", 100.0);
+    std::cout << "[Тест] Вне диапазона (100.0): " << commandResultToText(res_err) << "\n\n";
+
+    // --- Интерактивный режим ---
     std::string line;
     bool running = true;
 
@@ -44,12 +69,8 @@ int main() {
 
         } else if (cmd == "set" && tokens.size() >= 3) {
             double val = std::stod(tokens[2]);
-            if (setParameter(parameters, tokens[1], val)) {
-                std::cout << "Параметр " << tokens[1] << " обновлён.\n";
-                checkParametersAndLogWarnings(parameters, log);
-            } else {
-                std::cout << "Параметр не найден.\n";
-            }
+            CommandResult result = applyCommand(parameters, log, tokens[1], val);
+            std::cout << commandResultToText(result) << "\n";
 
         } else if (cmd == "event" && tokens.size() >= 3) {
             std::string msg;
@@ -64,18 +85,17 @@ int main() {
             printEventLog(log);
 
         } else if (cmd == "find" && tokens.size() >= 2) {
-            // find_if: поиск параметра по имени
-            const ParameterRecord* p = findParameterByName(parameters, tokens[1]);
-            if (p) {
-                std::cout << "Найден: " << p->name << " = " << p->value
-                          << " " << p->unit
-                          << " [" << p->minValue << ".." << p->maxValue << "]\n";
+            auto index = findParameterIndex(parameters, tokens[1]);
+            if (index) {
+                const auto& p = parameters[*index];
+                std::cout << "Найден: " << p.name << " = " << p.value
+                          << " " << p.unit
+                          << " [" << p.minValue << ".." << p.maxValue << "]\n";
             } else {
                 std::cout << "Параметр \"" << tokens[1] << "\" не найден.\n";
             }
 
         } else if (cmd == "alarm") {
-            // count_if + copy_if
             std::size_t count = countAlarmEvents(log);
             std::cout << "Тревожных событий: " << count << "\n";
             auto alarms = getAlarmEvents(log);
@@ -85,7 +105,6 @@ int main() {
             }
 
         } else if (cmd == "sorted") {
-            // sort: отсортированная копия журнала
             auto sorted = getSortedEventLog(log);
             std::cout << "Журнал (отсортированный по приоритету):\n";
             for (const auto& e : sorted) {
@@ -94,7 +113,6 @@ int main() {
             }
 
         } else if (cmd == "stats") {
-            // map: статистика по типам событий
             auto stats = getEventStatistics(log);
             std::cout << "Статистика по типам событий:\n";
             std::size_t total = 0;
@@ -105,7 +123,6 @@ int main() {
             std::cout << "  Всего: " << total << "\n";
 
         } else if (cmd == "summary") {
-            // transform: краткий список параметров
             auto summary = getParameterSummary(parameters);
             std::cout << "Краткий список параметров:\n";
             for (const auto& s : summary) {
@@ -114,6 +131,12 @@ int main() {
 
         } else if (cmd == "visual") {
             printVisualLayers(visualLayerNames());
+
+        } else if (cmd == "save") {
+            std::filesystem::path logPath = std::filesystem::path("logs") / "dispatch_session.txt";
+            saveTextLog(log, logPath);
+            std::cout << "Журнал сохранён: " << logPath << "\n";
+            assert(std::filesystem::exists(logPath));
 
         } else if (cmd == "exit") {
             running = false;
