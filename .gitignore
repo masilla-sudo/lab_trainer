@@ -1,0 +1,13 @@
+build/
+out/
+.cache/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.log
+.vscode/.browse.VC.db*
+.DS_Storebuild/

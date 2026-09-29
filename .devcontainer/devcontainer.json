@@ -1,0 +1,20 @@
+{
+  "name": "C++20 Dispatcher Trainer",
+  "image": "dispatcher-trainer-env",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "cmake.configureOnOpen": true,
+        "cmake.generator": "Ninja"
+      }
+    }
+  },
+  "postCreateCommand": "cmake --version && clang++ --version && clangd --version && lldb --version",
+  "remoteUser": "vscode"
+}
