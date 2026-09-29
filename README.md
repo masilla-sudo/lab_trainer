@@ -70,7 +70,7 @@ cmake --build build
 ```markdown
 ## Диаграмма 1: Поток данных
 
-``` mermaid
+```mermaid
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
     B --> C[RangeRule<T>]
