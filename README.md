@@ -65,7 +65,7 @@ cmake --build build
 ./build/dispatcher_trainer
 
 ## Диаграмма 1: Поток данных
-```mermaid
+````mermaid``
 
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
@@ -75,8 +75,7 @@ flowchart TD
     E --> F[VisualDescriptor]
     A --> F
     C --> E
-
-```
+`````
 
 #### Диаграмма 2: Классы правил и проверок
 
