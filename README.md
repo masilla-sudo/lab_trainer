@@ -43,6 +43,9 @@ find NOPE
 Параметр "NOPE" не найден.
 
 Изменение параметра:
+
+text
+
 set V-101 70.0
 Команда принята: V-101 = 70
 
@@ -50,15 +53,24 @@ set V-101 90.0
 Внимание: значение V-101 вне диапазона [0.000000..80.000000]
 
 Сохранение журнала:
+
+text
+
 save
 Журнал сохранён: logs/dispatch_session.txt
 
 Сборка и запуск
+
+bash
+
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
 Диаграмма 1: Поток данных
+
+mermaid
+
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
     B --> C[RangeRule<T>]
@@ -68,13 +80,15 @@ flowchart TD
     A --> F
     C --> E
 
-    Диаграмма 2: Классы правил и проверок
-    classDiagram
+Диаграмма 2: Классы правил и проверок
+
+mermaid
+
+classDiagram
     class ICheckRule {
         <<interface>>
         +check() CheckResult
     }
-
     class RangeRule~T~ {
         -parameter_ : Parameter~T~&
         -normalRange_ : Range~T~
@@ -82,7 +96,6 @@ flowchart TD
         -problemMessage_ : string
         +check() CheckResult
     }
-
     class Parameter~T~ {
         -id_ : string
         -label_ : string
@@ -94,19 +107,16 @@ flowchart TD
         +value() T&
         +setValue(T) void
     }
-
     class Range~T~ {
         -min : T
         -max : T
         +contains(T) bool
     }
-
     class CheckResult {
         +parameterId : string
         +message : string
         +severity : Severity
     }
-
     class VisualDescriptor {
         +objectId : string
         +visualKind : string
@@ -114,15 +124,17 @@ flowchart TD
         +color : string
         +priority : int
     }
-
     ICheckRule <|-- RangeRule~T~ : наследование
     RangeRule~T~ --> Parameter~T~ : использует
     RangeRule~T~ --> Range~T~ : содержит
     RangeRule~T~ ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
 
-    Диаграмма 3: Ключевой фрагмент для ЛР 8
-    classDiagram
+Диаграмма 3: Ключевой фрагмент для ЛР 8
+
+mermaid
+
+classDiagram
     class Parameter {
         +name: string
         +value: double
@@ -142,4 +154,5 @@ flowchart TD
     }
     Parameter *-- RangeRule : проверяется через
     RangeRule ..> ICheckRule : реализует
-    
+
+text
