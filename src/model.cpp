@@ -6,6 +6,8 @@
 #include <iterator>
 #include <string>
 #include <cmath>
+#include <optional>
+#include <variant>
 #include "trainer/log.hpp"
 
 // --- Вспомогательные функции ---
@@ -86,9 +88,6 @@ std::optional<std::size_t> findParameterIndex(const ParameterList& parameters,
 }
 
 // --- ГЛАВНАЯ ФУНКЦИЯ: applyCommand ---
-// Переменная 'p' объявляется и используется ТОЛЬКО здесь.
-// После этой скобки '}' НИКАКОГО кода быть не должно.
-
 CommandResult applyCommand(ParameterList& parameters, EventLog& log,
                            const std::string& name, double newValue) {
     
@@ -123,6 +122,7 @@ CommandResult applyCommand(ParameterList& parameters, EventLog& log,
         nearMax = (p.value >= nearMaxLimit && p.value <= p.maxValue);
         criticalMax = (p.value >= criticalMaxLimit && p.value <= p.maxValue);
     } else {
+        // Если диапазон почти нулевой, считаем любое отклонение критическим
         if (std::abs(p.value - p.minValue) > 1e-9) {
             criticalMin = true;
             criticalMax = true;
@@ -154,7 +154,6 @@ CommandResult applyCommand(ParameterList& parameters, EventLog& log,
 }
 
 // --- Вспомогательная функция для variant ---
-
 std::string commandResultToText(const CommandResult& result) {
     return std::visit([](const auto& item) {
         return item.text;

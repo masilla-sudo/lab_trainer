@@ -3,15 +3,17 @@ project(dispatcher_trainer LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# --- Основная цель: диспетчерский тренажёр (Lab 7) ---
+# --- Основная цель: диспетчерский тренажёр ---
 add_executable(dispatcher_trainer
     src/main.cpp
     src/model.cpp
     src/log.cpp
     src/commands.cpp
 )
+
 target_include_directories(dispatcher_trainer PRIVATE include)
 target_compile_options(dispatcher_trainer PRIVATE -Wall -Wextra -Wpedantic)
 

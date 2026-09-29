@@ -35,10 +35,6 @@ int main() {
     std::cout << "[Тест] " << commandResultToText(testResult) << "\n\n";
 
     // --- Тесты граничных значений для V-101 ---
-    // Диапазон V-101: [0..80], range = 80
-    // Критическая зона (2%): 80 * 0.02 = 1.6 → порог: 80 - 1.6 = 78.4
-    // Зона предупреждения (5%): 80 * 0.05 = 4.0 → порог: 80 - 4.0 = 76.0
-
     auto res_crit = applyCommand(parameters, log, "V-101", 79.0);
     std::cout << "[Тест] Критическая зона (79.0): " << commandResultToText(res_crit) << "\n";
 

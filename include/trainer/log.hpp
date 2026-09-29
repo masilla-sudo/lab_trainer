@@ -3,6 +3,8 @@
 #include <map>
 #include <cstddef>
 #include <filesystem>
+#include <string>
+#include <vector>
 
 // --- Существующие функции ---
 void addEvent(EventLog& log, const std::string& severity,

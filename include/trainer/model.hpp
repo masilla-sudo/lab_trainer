@@ -43,7 +43,7 @@ std::vector<std::string> getParameterSummary(const ParameterList& parameters);
 
 // --- ЛР 8: optional — поиск индекса параметра ---
 std::optional<std::size_t> findParameterIndex(const ParameterList& parameters,
-                                               const std::string& name);
+                                             const std::string& name);
 
 // --- ЛР 8: variant — применение команды с возвратом результата ---
 CommandResult applyCommand(ParameterList& parameters, EventLog& log,
