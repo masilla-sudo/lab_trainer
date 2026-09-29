@@ -65,7 +65,7 @@ cmake --build build
 ./build/dispatcher_trainer
 
 Диаграмма 1: Поток данных
-mermaid
+```mermaid
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
     B --> C[RangeRule<T>]
@@ -77,7 +77,7 @@ flowchart TD
      ...
 
 Диаграмма 2: Классы правил и проверок
-mermaid
+```mermaid
 classDiagram
     class ICheckRule {
         <<interface>>
@@ -126,7 +126,7 @@ classDiagram
      ...
 
 Диаграмма 3: Ключевой фрагмент для ЛР 8
-mermaid
+```mermaid
 classDiagram
     class Parameter {
         +name: string
