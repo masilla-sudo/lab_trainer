@@ -1,5 +1,3 @@
-markdown
-
 # dispatcher_trainer – Лабораторная работа 8: Modern C++ State
 
 Цель работы: применить современные возможности C++ (C++17/20) для безопасной обработки состояний и команд в ядре диспетчерского тренажёра.
@@ -35,87 +33,89 @@ markdown
 ## Примеры работы (вывод в консоль)
 
 **Поиск параметра:**
+
 ```text
 find V-101
 Найден: V-101 = 60 км/ч [0..80]
 
 find NOPE
 Параметр "NOPE" не найден.
+```
 
-Изменение параметра:
-text
+**Изменение параметра:**
 
+```text
 set V-101 70.0
 Команда принята: V-101 = 70
 
 set V-101 90.0
 Внимание: значение V-101 вне диапазона [0.000000..80.000000]
+```
 
-Сохранение журнала:
-text
+**Сохранение журнала:**
 
+```text
 save
 Журнал сохранён: logs/dispatch_session.txt
+```
 
-Сборка и запуск
-bash
+---
 
+## Сборка и запуск
+
+```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
+```
 
+---
 
-#### Диаграмма 1: Поток данных
-
-```markdown
 ## Диаграмма 1: Поток данных
 
-``` mermaid
+```mermaid
 flowchart TD
-    A[Parameter<T>] --> B[Range<T>]
-    B --> C[RangeRule<T>]
+    A[Parameter] --> B[Range]
+    B --> C[RangeRule]
     C --> D[ICheckRule]
     D --> E[CheckResult]
     E --> F[VisualDescriptor]
     A --> F
     C --> E
-
-text
 ```
 
-#### Диаграмма 2: Классы правил и проверок
+---
 
-```markdown
 ## Диаграмма 2: Классы правил и проверок
 
-``` mermaid
+```mermaid
 classDiagram
     class ICheckRule {
         <<interface>>
         +check() CheckResult
     }
-    class RangeRule~T~ {
-        -parameter_ : Parameter~T~&
-        -normalRange_ : Range~T~
-        -criticalRange_ : optional~Range~T~~
-        -problemMessage_ : string
+    class RangeRule {
+        -parameter : Parameter
+        -normalRange : Range
+        -criticalRange : optional~Range~
+        -problemMessage : string
         +check() CheckResult
     }
-    class Parameter~T~ {
-        -id_ : string
-        -label_ : string
-        -value_ : T
-        -unit_ : string
-        +id() string&
-        +label() string&
-        +unit() string&
-        +value() T&
-        +setValue(T) void
+    class Parameter {
+        -id : string
+        -label : string
+        -value : double
+        -unit : string
+        +id() string
+        +label() string
+        +unit() string
+        +value() double
+        +setValue(double) void
     }
-    class Range~T~ {
-        -min : T
-        -max : T
-        +contains(T) bool
+    class Range {
+        -min : double
+        -max : double
+        +contains(double) bool
     }
     class CheckResult {
         +parameterId : string
@@ -129,22 +129,19 @@ classDiagram
         +color : string
         +priority : int
     }
-    ICheckRule <|-- RangeRule~T~ : наследование
-    RangeRule~T~ --> Parameter~T~ : использует
-    RangeRule~T~ --> Range~T~ : содержит
-    RangeRule~T~ ..> CheckResult : возвращает
-    VisualDescriptor ..> CheckResult : формируется из
 
-text
+    ICheckRule ..|> RangeRule : реализует
+    RangeRule --> Parameter : использует
+    RangeRule --> Range : содержит
+    RangeRule ..> CheckResult : возвращает
+    VisualDescriptor ..> CheckResult : формируется из
 ```
 
-#### Диаграмма 3: Ключевой фрагмент для ЛР 8
+---
 
-```markdown
 ## Диаграмма 3: Ключевой фрагмент для ЛР 8
 
-``` mermaid
-
+```mermaid
 classDiagram
     class Parameter {
         +name: string
@@ -153,20 +150,19 @@ classDiagram
         +maxValue: double
         +unit: string
     }
-    class RangeRule~T~ {
-        -range: Range~T~
+    class RangeRule {
+        -range: Range
         -criticalPercent: double
         -warningPercent: double
-        +check(value: T): CommandResult
+        +check(value: double): CommandResult
     }
     class ICheckRule {
         <<interface>>
-        +check(value: auto): CommandResult
+        +check(value: double): CommandResult
     }
-    Parameter *-- RangeRule : проверяется через
-    RangeRule ..> ICheckRule : реализует
 
-text
-
-
+    Parameter "1" *-- "1" RangeRule : проверяется через
+    RangeRule ..|> ICheckRule : реализует
 ```
+
+---
