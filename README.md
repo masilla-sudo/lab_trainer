@@ -4,9 +4,9 @@
 
 ## Реализованные технологии
 
-- **`std::optional`** — безопасный поиск параметров без «магических» значений вроде `-1`.  
+- **`std::optional`** — безопасный поиск параметров без «магических» значений вроде `-1`.
   Если параметр не найден, возвращается `std::nullopt`.
-- **`std::variant`** — строгая типизация результатов команд: `CommandOk`, `CommandWarning`, `CommandError`.  
+- **`std::variant`** — строгая типизация результатов команд: `CommandOk`, `CommandWarning`, `CommandError`.
   Вывод сообщения через `std::visit`.
 - **`std::filesystem`** — сохранение журнала событий в файл `logs/dispatch_session.txt`.
 
@@ -154,5 +154,3 @@ classDiagram
     }
     Parameter *-- RangeRule : проверяется через
     RangeRule ..> ICheckRule : реализует
-
-text
