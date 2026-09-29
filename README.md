@@ -82,25 +82,27 @@ text
 
 ---
 
-#### Диаграмма 2: Классы правил и проверок
+### Диаграмма 2: Классы правил и проверок
+
+Здесь я заменил `~T~` на `<T>` и переписал связи в синтаксисе Mermaid classDiagram:
 
 ```markdown
 ## Диаграмма 2: Классы правил и проверок
 
-``` mermaid
+```mermaid
 classDiagram
     class ICheckRule {
         <<interface>>
         +check() CheckResult
     }
-    class RangeRule~T~ {
-        -parameter_ : Parameter~T~&
-        -normalRange_ : Range~T~
-        -criticalRange_ : optional~Range~T~~
+    class RangeRule_T {
+        -parameter_ : Parameter_T&
+        -normalRange_ : Range_T
+        -criticalRange_ : optional_Range_T
         -problemMessage_ : string
         +check() CheckResult
     }
-    class Parameter~T~ {
+    class Parameter_T {
         -id_ : string
         -label_ : string
         -value_ : T
@@ -111,7 +113,7 @@ classDiagram
         +value() T&
         +setValue(T) void
     }
-    class Range~T~ {
+    class Range_T {
         -min : T
         -max : T
         +contains(T) bool
@@ -128,22 +130,25 @@ classDiagram
         +color : string
         +priority : int
     }
-    ICheckRule <|-- RangeRule~T~ : наследование
-    RangeRule~T~ --> Parameter~T~ : использует
-    RangeRule~T~ --> Range~T~ : содержит
-    RangeRule~T~ ..> CheckResult : возвращает
+
+    ICheckRule ..|> RangeRule_T : реализует
+    RangeRule_T --> Parameter_T : использует
+    RangeRule_T --> Range_T : содержит
+    RangeRule_T ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
 
 text
-```
 
-#### Диаграмма 3: Ключевой фрагмент для ЛР 8
+---
+
+### Диаграмма 3: Ключевой фрагмент для ЛР 8
+
+Тоже исправляем шаблоны и связи:
 
 ```markdown
 ## Диаграмма 3: Ключевой фрагмент для ЛР 8
 
-``` mermaid
-
+```mermaid
 classDiagram
     class Parameter {
         +name: string
@@ -152,20 +157,20 @@ classDiagram
         +maxValue: double
         +unit: string
     }
-    class RangeRule~T~ {
-        -range: Range~T~
+    class RangeRule {
+        -range: Range
         -criticalPercent: double
         -warningPercent: double
-        +check(value: T): CommandResult
+        +check(value: double): CommandResult
     }
     class ICheckRule {
         <<interface>>
-        +check(value: auto): CommandResult
+        +check(value: double): CommandResult
     }
-    Parameter *-- RangeRule : проверяется через
-    RangeRule ..> ICheckRule : реализует
+
+    Parameter "1" *-- "1" RangeRule : проверяется через
+    RangeRule ..|> ICheckRule : реализует
 
 text
 
-
-```
+---
