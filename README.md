@@ -1,13 +1,13 @@
-# dispatcher_trainer — Лабораторная работа 8: Modern C++ State
+markdown
+
+# dispatcher_trainer – Лабораторная работа 8: Modern C++ State
 
 Цель работы: применить современные возможности C++ (C++17/20) для безопасной обработки состояний и команд в ядре диспетчерского тренажёра.
 
 ## Реализованные технологии
 
-- **`std::optional`** — безопасный поиск параметров без «магических» значений вроде `-1`.
-  Если параметр не найден, возвращается `std::nullopt`.
-- **`std::variant`** — строгая типизация результатов команд: `CommandOk`, `CommandWarning`, `CommandError`.
-  Вывод сообщения через `std::visit`.
+- **`std::optional`** — безопасный поиск параметров без «магических» значений вроде `-1`. Если параметр не найден, возвращается `std::nullopt`.
+- **`std::variant`** — строгая типизация результатов команд: `CommandOk`, `CommandWarning`, `CommandError`. Вывод сообщения через `std::visit`.
 - **`std::filesystem`** — сохранение журнала событий в файл `logs/dispatch_session.txt`.
 
 ---
@@ -64,8 +64,13 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
-Диаграмма 1: Поток данных
-```mermaid
+
+#### Диаграмма 1: Поток данных
+
+```markdown
+## Диаграмма 1: Поток данных
+
+``` mermaid
 flowchart TD
     A[Parameter<T>] --> B[Range<T>]
     B --> C[RangeRule<T>]
@@ -74,10 +79,16 @@ flowchart TD
     E --> F[VisualDescriptor]
     A --> F
     C --> E
+
+text
 ```
 
-Диаграмма 2: Классы правил и проверок
-```mermaid
+#### Диаграмма 2: Классы правил и проверок
+
+```markdown
+## Диаграмма 2: Классы правил и проверок
+
+``` mermaid
 classDiagram
     class ICheckRule {
         <<interface>>
@@ -123,10 +134,17 @@ classDiagram
     RangeRule~T~ --> Range~T~ : содержит
     RangeRule~T~ ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
-     ```
 
-Диаграмма 3: Ключевой фрагмент для ЛР 8
-```mermaid
+text
+```
+
+#### Диаграмма 3: Ключевой фрагмент для ЛР 8
+
+```markdown
+## Диаграмма 3: Ключевой фрагмент для ЛР 8
+
+``` mermaid
+
 classDiagram
     class Parameter {
         +name: string
@@ -147,4 +165,8 @@ classDiagram
     }
     Parameter *-- RangeRule : проверяется через
     RangeRule ..> ICheckRule : реализует
-     ```
+
+text
+
+
+```
