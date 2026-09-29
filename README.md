@@ -148,3 +148,8 @@ classDiagram
     }
     Parameter *-- RangeRule : проверяется через
     RangeRule ..> ICheckRule : реализует
+
+text
+
+
+---
