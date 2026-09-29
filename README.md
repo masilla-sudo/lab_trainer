@@ -43,7 +43,6 @@ find NOPE
 Параметр "NOPE" не найден.
 
 Изменение параметра:
-
 text
 
 set V-101 70.0
@@ -53,14 +52,12 @@ set V-101 90.0
 Внимание: значение V-101 вне диапазона [0.000000..80.000000]
 
 Сохранение журнала:
-
 text
 
 save
 Журнал сохранён: logs/dispatch_session.txt
 
 Сборка и запуск
-
 bash
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -68,7 +65,6 @@ cmake --build build
 ./build/dispatcher_trainer
 
 Диаграмма 1: Поток данных
-
 mermaid
 
 flowchart TD
@@ -81,7 +77,6 @@ flowchart TD
     C --> E
 
 Диаграмма 2: Классы правил и проверок
-
 mermaid
 
 classDiagram
@@ -131,7 +126,6 @@ classDiagram
     VisualDescriptor ..> CheckResult : формируется из
 
 Диаграмма 3: Ключевой фрагмент для ЛР 8
-
 mermaid
 
 classDiagram
