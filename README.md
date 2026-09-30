@@ -64,7 +64,7 @@ save
 ## Сборка и запуск
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B cmake-build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 ```
