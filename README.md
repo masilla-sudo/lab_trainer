@@ -74,6 +74,7 @@ cmake --build build
 ## Диаграмма 1: Поток данных
 
 ```mermaid
+
 flowchart TD
     A[Parameter] --> B[Range]
     B --> C[RangeRule]
@@ -84,11 +85,10 @@ flowchart TD
     C --> E
 ```
 
----
-
 ## Диаграмма 2: Классы правил и проверок
 
 ```mermaid
+
 classDiagram
     class ICheckRule {
         <<interface>>
@@ -135,9 +135,8 @@ classDiagram
     RangeRule --> Range : содержит
     RangeRule ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
-```
 
----
+```
 
 ## Диаграмма 3: Ключевой фрагмент для ЛР 8
 
@@ -163,6 +162,5 @@ classDiagram
 
     Parameter "1" *-- "1" RangeRule : проверяется через
     RangeRule ..|> ICheckRule : реализует
-```
 
----
+```
