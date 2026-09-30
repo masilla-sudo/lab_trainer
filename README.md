@@ -164,3 +164,27 @@ classDiagram
     RangeRule ..|> ICheckRule : реализует
 
 ```
+
+## Сборка в devcontainer
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/dispatcher_trainer
+
+Сборка в Linux VM
+
+bash
+
+sudo apt update
+sudo apt install -y build-essential cmake git
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/dispatcher_trainer
+
+Изменения в ЛР 9
+
+    оформлена история Git;
+    создана рабочая ветка;
+    выполнено слияние;
+    разобран простой конфликт;
+    уточнён демонстрационный сценарий.
