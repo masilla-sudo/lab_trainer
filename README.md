@@ -63,16 +63,12 @@ save
 
 ## Сборка и запуск
 
+### В devcontainer (VS Code)
 ```bash
-# Сборка и запуск
-
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
-```
-
----
 
 ## Диаграмма 1: Поток данных
 
