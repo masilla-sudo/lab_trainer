@@ -204,6 +204,36 @@ void test_event_statistics_and_sorted_log() {
           "sorted log should contain all events");
 }
 
+// --- ЛР 13: регрессия на дефект printEventLog (чтение за границей) ---
+// Дефект проявлялся, когда size == capacity: цикл i <= size() читал
+// элемент за границей выделенного блока (heap-buffer-overflow под ASan).
+void test_print_event_log_at_full_capacity() {
+    // Arrange: заполняем журнал ровно до совпадения size и capacity —
+    // именно на этой границе дефеvoid test_print_event_log_at_full_capacity() {
+    EventLog log;
+    
+    // 1. Резервируем память под 100 элементов. 
+    // Теперь log.capacity() == 100 и больше не изменится при добавлении.
+    const size_t target_capacity = 100;
+    log.reserve(target_capacity);
+
+    // 2. Заполняем ровно до capacity (100 элементов)
+    for (size_t i = 0; i < target_capacity; ++i) {
+        addEvent(log, "Info", "test", "event #" + std::to_string(i));
+    }
+
+    // 3. Проверяем, что мы действительно заполнили вектор
+    check(log.size() == log.capacity(), "log should be at full capacity");
+    check(log.size() == target_capacity, "log size should match reserved capacity");
+
+    // 4. Вызываем функцию, которую мы чинили. 
+    // Она должна отработать быстро и без ошибок доступа к памяти.
+    printEventLog(log);
+    
+    check(true, "printEventLog at size == capacity should not read out of bounds");
+}
+
+
 int main() {
     // Группа 1: диапазоны
     test_range_contains_boundary_values();
@@ -215,20 +245,20 @@ int main() {
     // RangeRule: пороговая логика
     test_range_rule_ok_and_critical();
 
-        // Группа 2: изменение состояния
+    // Группа 2: изменение состояния
     test_set_parameter_changes_state();
     test_set_parameter_missing_name_fails();
     test_set_parameter_accepts_any_value();
     test_apply_command_ok_and_error();
 
-
     // Группа 3: поиск параметра
     test_find_existing_parameter();
     test_find_missing_parameter();
 
-    // Группа 4: журнал событий
+   // Группа 4: журнал событий
     test_add_event_increases_log();
     test_event_statistics_and_sorted_log();
+    test_print_event_log_at_full_capacity(); // ЛР 13: регрессия на дефект печати журнала
 
     std::cout << "All tests passed\n";
     return 0;

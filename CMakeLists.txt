@@ -59,3 +59,24 @@ target_compile_features(test_core
 )
 target_compile_options(test_core PRIVATE -Wall -Wextra -Wpedantic)
 add_test(NAME core COMMAND test_core)
+
+# --- ЛР 13: опциональная сборка с санитайзерами ---
+option(ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+function(enable_project_sanitizers target_name)
+    if(ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${target_name} PRIVATE
+            -fsanitize=address,undefined
+            -fno-omit-frame-pointer
+            -g
+        )
+        target_link_options(${target_name} PRIVATE
+            -fsanitize=address,undefined
+        )
+    endif()
+endfunction()
+
+enable_project_sanitizers(dispatcher_core)
+enable_project_sanitizers(dispatcher_trainer)
+enable_project_sanitizers(test_core)
+enable_project_sanitizers(test_template_rules)
