@@ -24,4 +24,5 @@ logs/
 # Среды разработки и ОС
 .vscode/.browse.VC.db*
 .cache/
-.DS_Store
+.DS_Storeclean_run.log
+asan_before.log
