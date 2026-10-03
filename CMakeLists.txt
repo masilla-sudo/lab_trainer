@@ -44,3 +44,18 @@ target_link_libraries(test_template_rules
         dispatcher_core
 )
 add_test(NAME template_rules COMMAND test_template_rules)
+
+# --- Тесты ядра (Lab 12) ---
+add_executable(test_core
+    tests/test_core.cpp
+)
+target_link_libraries(test_core
+    PRIVATE
+        dispatcher_core
+)
+target_compile_features(test_core
+    PRIVATE
+        cxx_std_20
+)
+target_compile_options(test_core PRIVATE -Wall -Wextra -Wpedantic)
+add_test(NAME core COMMAND test_core)
