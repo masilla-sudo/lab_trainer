@@ -1,4 +1,3 @@
-# Каталоги сборки CMake
 build/
 build-*/
 out/
@@ -7,12 +6,8 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 compile_commands.json
-
-# Сгенерированные файлы программы
 logs/
 *.log
-
-# Объектные файлы и бинарники
 *.o
 *.obj
 *.exe
@@ -20,9 +15,21 @@ logs/
 *.so
 *.dylib
 *.a
-
-# Среды разработки и ОС
 .vscode/.browse.VC.db*
 .cache/
-.DS_Storeclean_run.log
+.DS_Store
+clean_run.log
 asan_before.log
+asan.log
+lsan.log
+tsan.log
+ubsan.log
+*.stackdump
+core.*
+notes/*.tmp
+notes/*.bak
+notes/draft_*.md
+tests/*.tmp
+tests/fixtures/*.tmp
+.vscode/settings.json
+.vscode/c_cpp_properties.json
