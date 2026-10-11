@@ -1,6 +1,8 @@
 {
   "name": "C++20 Dispatcher Trainer",
-  "image": "dispatcher-trainer-env",
+"build": {
+    "dockerfile": "Dockerfile"
+},
   "customizations": {
     "vscode": {
       "extensions": [
@@ -17,4 +19,5 @@
   },
   "postCreateCommand": "cmake --version && clang++ --version && clangd --version && lldb --version",
   "remoteUser": "vscode"
+  "workspaceFolder": "/workspaces/dispatcher_trainer",
 }
