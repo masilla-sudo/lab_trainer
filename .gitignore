@@ -1,6 +1,18 @@
+# Каталоги сборки CMake
 build/
+build-*/
 out/
-.cache/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Сгенерированные файлы программы
+logs/
+*.log
+
+# Объектные файлы и бинарники
 *.o
 *.obj
 *.exe
@@ -8,6 +20,8 @@ out/
 *.so
 *.dylib
 *.a
-*.log
+
+# Среды разработки и ОС
 .vscode/.browse.VC.db*
-.DS_Storebuild/
+.cache/
+.DS_Store
