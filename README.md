@@ -1,4 +1,3 @@
-
 # dispatcher_trainer – Лабораторная работа 8: Modern C++ State
 
 Цель работы: применить современные возможности C++ (C++17/20) для безопасной обработки состояний и команд в ядре диспетчерского тренажёра.
@@ -28,52 +27,82 @@
 - `set <param> <val>` — изменение параметра (результат в `std::variant`).
 - `save` — сохранение журнала (через `std::filesystem`).
 - `log` — просмотр журнала событий.
+- `elements` — полиморфный вывод элементов модели (см. раздел «Полиморфная модель»).
 
 ---
 
-## Примеры работы (вывод в консоль)
+## Полиморфная модель
 
-**Поиск параметра:**
+Элементы системы построены на интерфейсе `ISystemElement` (чистые виртуальные методы `id()`, `kind()`, `status()`, `summary()`) и наследуются от него: `Train`, `Station`, `Signal` (а также `Route`, `Incident`, `ARHint`). Каждый элемент параллельно реализует интерфейс `IVisualDescriptorProvider` с методом `toVisualDescriptor()`.
+
+Контейнер `DispatcherModel` хранит элементы как `std::vector<std::unique_ptr<ISystemElement>>`. Метод `printSummary()` обходит коллекцию и вызывает `summary()` через базовый указатель — статический тип один (`ISystemElement*`), динамический у каждого элемента свой. Метод `collectVisualDescriptors()` достаёт визуальные описания через `dynamic_cast` к `IVisualDescriptorProvider`.
+
+Владение элементами — через `std::make_unique`, полиморфное удаление — через виртуальный деструктор интерфейса.
+
+**Пример вывода команды `elements`** (один цикл — разные форматы строк):
 
 ```text
+> elements
+--- Сводка элементов системы ---
+Поезд T-101 на маршруте "R-7" (статус: Normal)
+Поезд T-102 на маршруте "R-3" (статус: Normal)
+Станция Северная (S-1, платформ: 4, статус: Normal)
+Станция Южная (S-2, платформ: 2, статус: Normal)
+Сигнал S-42 (состояние: Normal)
+Сигнал S-43 (состояние: Critical)
+--- Визуальные дескрипторы ---
+  T-101 | train_marker | Поезд T-101 (R-7) | blue | приоритет 2
+  T-102 | train_marker | Поезд T-102 (R-3) | blue | приоритет 2
+  S-1 | station_marker | Станция Северная | green | приоритет 1
+  S-2 | station_marker | Станция Южная | green | приоритет 1
+  S-42 | marker | Сигнал S-42 | green | приоритет 1
+  S-43 | marker | Сигнал S-43 | red | приоритет 1
+
+Примеры работы (вывод в консоль)
+
+Поиск параметра:
+text
+
 find V-101
 Найден: V-101 = 60 км/ч [0..80]
 
 find NOPE
 Параметр "NOPE" не найден.
-```
 
-**Изменение параметра:**
+Изменение параметра:
+text
 
-```text
 set V-101 70.0
 Команда принята: V-101 = 70
 
 set V-101 90.0
 Внимание: значение V-101 вне диапазона [0.000000..80.000000]
-```
 
-**Сохранение журнала:**
+Сохранение журнала:
+text
 
-```text
 save
 Журнал сохранён: logs/dispatch_session.txt
-```
 
----
+Сборка и запуск
+В devcontainer (VS Code)
+bash
 
-## Сборка и запуск
-
-### В devcontainer (VS Code)
-```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
 
+В Linux VM
+bash
 
-## Диаграмма 1: Поток данных
+sudo apt update
+sudo apt install -y build-essential cmake git
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/dispatcher_trainer
 
-```mermaid
+Диаграмма 1: Поток данных
+mermaid
 
 flowchart TD
     A[Parameter] --> B[Range]
@@ -83,11 +112,9 @@ flowchart TD
     E --> F[VisualDescriptor]
     A --> F
     C --> E
-```
 
-## Диаграмма 2: Классы правил и проверок
-
-```mermaid
+Диаграмма 2: Классы правил и проверок
+mermaid
 
 classDiagram
     class ICheckRule {
@@ -136,11 +163,9 @@ classDiagram
     RangeRule ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
 
-```
+Диаграмма 3: Ключевой фрагмент для ЛР 8
+mermaid
 
-## Диаграмма 3: Ключевой фрагмент для ЛР 8
-
-```mermaid
 classDiagram
     class Parameter {
         +name: string
@@ -163,23 +188,55 @@ classDiagram
     Parameter "1" *-- "1" RangeRule : проверяется через
     RangeRule ..|> ICheckRule : реализует
 
-```
+Диаграмма 4: Полиморфная модель элементов
+mermaid
 
-## Сборка в devcontainer
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-./build/dispatcher_trainer
+classDiagram
+    class ISystemElement {
+        <<interface>>
+        +id() string
+        +kind() string
+        +status() string
+        +summary() string
+    }
+    class IVisualDescriptorProvider {
+        <<interface>>
+        +toVisualDescriptor() VisualDescriptor
+    }
+    class Train {
+        -id_ : string
+        -route_ : string
+        +summary() string
+        +toVisualDescriptor() VisualDescriptor
+    }
+    class Station {
+        -id_ : string
+        -name_ : string
+        -platforms_ : int
+        +summary() string
+        +toVisualDescriptor() VisualDescriptor
+    }
+    class Signal {
+        -id_ : string
+        -state_ : SignalState
+        +summary() string
+        +toVisualDescriptor() VisualDescriptor
+    }
+    class DispatcherModel {
+        -elements_ : vector~unique_ptr~ISystemElement~~
+        +addElement(unique_ptr) void
+        +printSummary() void
+        +collectVisualDescriptors() vector~VisualDescriptor~
+    }
 
-Сборка в Linux VM
-
-bash
-
-sudo apt update
-sudo apt install -y build-essential cmake git
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-./build/dispatcher_trainer
+    ISystemElement <|.. Train : реализует
+    ISystemElement <|.. Station : реализует
+    ISystemElement <|.. Signal : реализует
+    IVisualDescriptorProvider <|.. Train
+    IVisualDescriptorProvider <|.. Station
+    IVisualDescriptorProvider <|.. Signal
+    DispatcherModel o-- ISystemElement : владеет unique_ptr
+    DispatcherModel ..> IVisualDescriptorProvider : dynamic_cast
 
 Изменения в ЛР 9
 
@@ -188,4 +245,3 @@ cmake --build build
     выполнено слияние;
     разобран простой конфликт;
     уточнён демонстрационный сценарий.
->>>>>>> 86c1c10 (docs: corrected README for lab8 (variant B, railway junction))
