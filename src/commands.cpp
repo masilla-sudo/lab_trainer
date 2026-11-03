@@ -31,6 +31,7 @@ void printHelp() {
               << "  sorted             - отсортированный журнал (sort)\n"
               << "  stats              - статистика по типам (map)\n"
               << "  summary            - краткий список параметров (transform)\n"
+              << "  elements           - элементы модели: summary и visual-дескрипторы\n"
               << "  visual             - список визуальных/AR-слоёв\n"
               << "  save               - сохранить журнал в файл (filesystem)\n"
               << "  exit               - завершить работу\n";

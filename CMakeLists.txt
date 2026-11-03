@@ -12,6 +12,10 @@ add_executable(dispatcher_trainer
     src/model.cpp
     src/log.cpp
     src/commands.cpp
+    src/model/DispatcherModel.cpp
+    src/model/Train.cpp
+    src/model/Station.cpp
+    src/model/Signal.cpp
 )
 
 target_include_directories(dispatcher_trainer PRIVATE include)

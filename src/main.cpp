@@ -1,6 +1,10 @@
 #include "trainer/model.hpp"
 #include "trainer/log.hpp"
 #include "trainer/commands.hpp"
+#include "dispatcher/model/DispatcherModel.hpp"
+#include "dispatcher/model/Train.hpp"
+#include "dispatcher/model/Station.hpp"
+#include "dispatcher/model/Signal.hpp"
 
 #include <iostream>
 #include <string>
@@ -23,6 +27,15 @@ int main() {
     addEvent(log, "Warning",        "I-201",   "Интервал ниже нормы");
     addEvent(log, "Alarm",          "O-301",   "Занятость пути превышена");
     addEvent(log, "Info",           "system",  "Проверка параметров завершена");
+
+    // --- Полиморфная модель (ЛР 5): интерфейс ISystemElement + наследники ---
+    DispatcherModel model;
+    model.addElement(std::make_unique<Train>("T-101", "R-7"));
+    model.addElement(std::make_unique<Train>("T-102", "R-3"));
+    model.addElement(std::make_unique<Station>("S-1", "Северная", 4));
+    model.addElement(std::make_unique<Station>("S-2", "Южная", 2));
+    model.addElement(std::make_unique<Signal>("S-42", SignalState::Green));
+    model.addElement(std::make_unique<Signal>("S-43", SignalState::Red));
 
     std::cout << "=== Диспетчерский тренажёр (ЛР 8: modern C++ — optional, variant, filesystem) ===\n\n";
 
@@ -123,6 +136,15 @@ int main() {
             std::cout << "Краткий список параметров:\n";
             for (const auto& s : summary) {
                 std::cout << "  " << s << "\n";
+            }
+
+        } else if (cmd == "elements") {
+            model.printSummary();
+            std::cout << "--- Визуальные дескрипторы ---\n";
+            for (const auto& vd : model.collectVisualDescriptors()) {
+                std::cout << "  " << vd.elementId << " | " << vd.visualKind
+                          << " | " << vd.label << " | " << vd.color
+                          << " | приоритет " << vd.priority << "\n";
             }
 
         } else if (cmd == "visual") {
