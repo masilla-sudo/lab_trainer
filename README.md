@@ -57,53 +57,66 @@
   S-2 | station_marker | Станция Южная | green | приоритет 1
   S-42 | marker | Сигнал S-42 | green | приоритет 1
   S-43 | marker | Сигнал S-43 | red | приоритет 1
+```
 
-Примеры работы (вывод в консоль)
+---
 
-Поиск параметра:
-text
+## Примеры работы (вывод в консоль)
 
+**Поиск параметра:**
+
+```text
 find V-101
 Найден: V-101 = 60 км/ч [0..80]
 
 find NOPE
 Параметр "NOPE" не найден.
+```
 
-Изменение параметра:
-text
+**Изменение параметра:**
 
+```text
 set V-101 70.0
 Команда принята: V-101 = 70
 
 set V-101 90.0
 Внимание: значение V-101 вне диапазона [0.000000..80.000000]
+```
 
-Сохранение журнала:
-text
+**Сохранение журнала:**
 
+```text
 save
 Журнал сохранён: logs/dispatch_session.txt
+```
 
-Сборка и запуск
-В devcontainer (VS Code)
-bash
+---
 
+## Сборка и запуск
+
+### В devcontainer (VS Code)
+
+```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
+```
 
-В Linux VM
-bash
+### В Linux VM
 
+```bash
 sudo apt update
 sudo apt install -y build-essential cmake git
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/dispatcher_trainer
+```
 
-Диаграмма 1: Поток данных
-mermaid
+---
 
+## Диаграмма 1: Поток данных
+
+```mermaid
 flowchart TD
     A[Parameter] --> B[Range]
     B --> C[RangeRule]
@@ -112,10 +125,11 @@ flowchart TD
     E --> F[VisualDescriptor]
     A --> F
     C --> E
+```
 
-Диаграмма 2: Классы правил и проверок
-mermaid
+## Диаграмма 2: Классы правил и проверок
 
+```mermaid
 classDiagram
     class ICheckRule {
         <<interface>>
@@ -162,10 +176,11 @@ classDiagram
     RangeRule --> Range : содержит
     RangeRule ..> CheckResult : возвращает
     VisualDescriptor ..> CheckResult : формируется из
+```
 
-Диаграмма 3: Ключевой фрагмент для ЛР 8
-mermaid
+## Диаграмма 3: Ключевой фрагмент для ЛР 8
 
+```mermaid
 classDiagram
     class Parameter {
         +name: string
@@ -187,10 +202,11 @@ classDiagram
 
     Parameter "1" *-- "1" RangeRule : проверяется через
     RangeRule ..|> ICheckRule : реализует
+```
 
-Диаграмма 4: Полиморфная модель элементов
-mermaid
+## Диаграмма 4: Полиморфная модель элементов
 
+```mermaid
 classDiagram
     class ISystemElement {
         <<interface>>
@@ -237,11 +253,14 @@ classDiagram
     IVisualDescriptorProvider <|.. Signal
     DispatcherModel o-- ISystemElement : владеет unique_ptr
     DispatcherModel ..> IVisualDescriptorProvider : dynamic_cast
+```
 
-Изменения в ЛР 9
+---
 
-    оформлена история Git;
-    создана рабочая ветка;
-    выполнено слияние;
-    разобран простой конфликт;
-    уточнён демонстрационный сценарий.
+## Изменения в ЛР 9
+
+- оформлена история Git;
+- создана рабочая ветка;
+- выполнено слияние;
+- разобран простой конфликт;
+- уточнён демонстрационный сценарий.
