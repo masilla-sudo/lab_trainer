@@ -141,7 +141,7 @@ void test_apply_command_ok_and_error() {
     check(parameters[0].value == 70.0,
           "successful command should update parameter");
 
-   // Вне диапазона: значение применяется, но команда возвращает CommandWarning
+    // Вне диапазона: значение применяется, но команда возвращает CommandWarning
     auto bad = applyCommand(parameters, log, "V-101", 100.0);
     check(std::holds_alternative<CommandWarning>(bad),
           "out-of-range command should return CommandWarning");
@@ -149,6 +149,35 @@ void test_apply_command_ok_and_error() {
           "applyCommand applies value even when out of range");
     check(!log.empty(),
           "out-of-range command should add an event to the log");
+}
+
+// ЛР 13: граничное значение applyCommand — 80.0 равно maxValue, должно быть
+// принято и классифицировано как критическая близость границы (CommandWarning),
+// а не как «вне диапазона».
+void test_apply_command_upper_boundary() {
+    // Arrange
+    ParameterList parameters{{"V-101", 60.0, 0.0, 80.0, "км/ч"}};
+    EventLog log;
+
+    // Act
+    const CommandResult result = applyCommand(parameters, log, "V-101", 80.0);
+
+    // Assert
+    check(std::holds_alternative<CommandWarning>(result),
+          "upper boundary 80.0 should produce CommandWarning");
+
+    const std::string text = std::visit([](const auto& item) {
+        return item.text;
+    }, result);
+    check(text.find("вне диапазона") == std::string::npos,
+          "upper boundary 80.0 should not be treated as out of range");
+    check(text.find("критической близости") != std::string::npos,
+          "upper boundary 80.0 should be reported as critical near boundary");
+
+    check(parameters[0].value == 80.0,
+          "parameter value should be set to 80.0");
+    check(log.back().severity == "Warning",
+          "upper boundary event should be logged as Warning, not Alarm");
 }
 
 // --- Группа 3. Поиск параметра (std::optional) ---
@@ -209,10 +238,10 @@ void test_event_statistics_and_sorted_log() {
 // элемент за границей выделенного блока (heap-buffer-overflow под ASan).
 void test_print_event_log_at_full_capacity() {
     // Arrange: заполняем журнал ровно до совпадения size и capacity —
-    // именно на этой границе дефеvoid test_print_event_log_at_full_capacity() {
+    // именно на этой границе дефект проявляется.
     EventLog log;
-    
-    // 1. Резервируем память под 100 элементов. 
+
+    // 1. Резервируем память под 100 элементов.
     // Теперь log.capacity() == 100 и больше не изменится при добавлении.
     const size_t target_capacity = 100;
     log.reserve(target_capacity);
@@ -226,13 +255,12 @@ void test_print_event_log_at_full_capacity() {
     check(log.size() == log.capacity(), "log should be at full capacity");
     check(log.size() == target_capacity, "log size should match reserved capacity");
 
-    // 4. Вызываем функцию, которую мы чинили. 
+    // 4. Вызываем функцию, которую чинили.
     // Она должна отработать быстро и без ошибок доступа к памяти.
     printEventLog(log);
-    
+
     check(true, "printEventLog at size == capacity should not read out of bounds");
 }
-
 
 int main() {
     // Группа 1: диапазоны
@@ -250,12 +278,13 @@ int main() {
     test_set_parameter_missing_name_fails();
     test_set_parameter_accepts_any_value();
     test_apply_command_ok_and_error();
+    test_apply_command_upper_boundary(); // ЛР 13: граничное значение applyCommand
 
     // Группа 3: поиск параметра
     test_find_existing_parameter();
     test_find_missing_parameter();
 
-   // Группа 4: журнал событий
+    // Группа 4: журнал событий
     test_add_event_increases_log();
     test_event_statistics_and_sorted_log();
     test_print_event_log_at_full_capacity(); // ЛР 13: регрессия на дефект печати журнала
