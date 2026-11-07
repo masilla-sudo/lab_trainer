@@ -20,7 +20,8 @@ void addEvent(EventLog& log, const std::string& severity,
 // --- Вывод журнала ---
 void printEventLog(const EventLog& log) {
     std::cout << "Журнал событий (" << log.size() << "):\n";
-    for (const auto& e : log) {
+        for (std::size_t i = 0; i < log.size(); ++i) {
+        const EventRecord& e = log[i];
         std::cout << "  [" << e.id << "] " << e.severity
                   << " | " << e.source << " | " << e.message << "\n";
     }
